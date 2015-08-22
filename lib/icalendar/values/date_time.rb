@@ -12,14 +12,7 @@ module Icalendar
       def initialize(value, params = {})
         if value.is_a? String
           params['tzid'] = 'UTC' if value.end_with? 'Z'
-
-          begin
-            parsed_date = ::DateTime.strptime(value, FORMAT)
-          rescue ArgumentError => e
-            raise FormatError.new("Failed to parse \"#{value}\" - #{e.message}")
-          end
-
-          super parsed_date, params
+          super ::DateTime.strptime(value, FORMAT), params
         elsif value.respond_to? :to_datetime
           super value.to_datetime, params
         else
@@ -43,8 +36,6 @@ module Icalendar
         end
       end
 
-      class FormatError < ArgumentError
-      end
     end
 
   end

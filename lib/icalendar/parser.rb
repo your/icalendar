@@ -32,11 +32,26 @@ module Icalendar
 
     def parse_property(component, fields = nil)
       fields = next_fields if fields.nil?
+      klass = component.class.default_property_types[fields[:name]]
+      if !fields[:params]['value'].nil?
+        klass_name = fields[:params].delete('value').first
+        unless klass_name.upcase == klass.value_type
+          klass_name = klass_name.downcase.gsub(/(?:\A|-)(.)/) { |m| m[-1].upcase }
+          klass = Icalendar::Values.const_get klass_name if Icalendar::Values.const_defined?(klass_name)
+        end
+      end
+      if klass.value_type != 'RECUR' && fields[:value] =~ /(?<!\\)([,;])/
+        delimiter = $1
+        prop_value = Icalendar::Values::Array.new fields[:value].split(/(?<!\\)[;,]/),
+                                                  klass,
+                                                  fields[:params],
+                                                  delimiter: delimiter
+      else
+        prop_value = klass.new fields[:value], fields[:params]
+      end
       prop_name = %w(class method).include?(fields[:name]) ? "ip_#{fields[:name]}" : fields[:name]
-      multi_property = component.class.multiple_properties.include? prop_name
-      prop_value = wrap_property_value component, fields, multi_property
       begin
-        method_name = if multi_property
+        method_name = if component.class.multiple_properties.include? prop_name
           "append_#{prop_name}"
         else
           "#{prop_name}="
@@ -51,40 +66,6 @@ module Icalendar
           component.append_custom_property prop_name, prop_value
         end
       end
-    end
-
-    def wrap_property_value(component, fields, multi_property)
-      klass = get_wrapper_class component, fields
-      if wrap_in_array? klass, fields[:value], multi_property
-        delimiter = fields[:value].match(/(?<!\\)([,;])/)[1]
-        Icalendar::Values::Array.new fields[:value].split(/(?<!\\)[;,]/),
-                                     klass,
-                                     fields[:params],
-                                     delimiter: delimiter
-      else
-        klass.new fields[:value], fields[:params]
-      end
-    rescue Icalendar::Values::DateTime::FormatError => fe
-      raise fe if strict?
-      fields[:params]['value'] = ['DATE']
-      retry
-    end
-
-    def wrap_in_array?(klass, value, multi_property)
-      klass.value_type != 'RECUR' &&
-        ((multi_property && value =~ /(?<!\\)[,;]/) || value =~ /(?<!\\);/)
-    end
-
-    def get_wrapper_class(component, fields)
-      klass = component.class.default_property_types[fields[:name]]
-      if !fields[:params]['value'].nil?
-        klass_name = fields[:params].delete('value').first
-        unless klass_name.upcase == klass.value_type
-          klass_name = klass_name.downcase.gsub(/(?:\A|-)(.)/) { |m| m[-1].upcase }
-          klass = Icalendar::Values.const_get klass_name if Icalendar::Values.const_defined?(klass_name)
-        end
-      end
-      klass
     end
 
     def strict?

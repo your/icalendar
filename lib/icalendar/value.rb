@@ -1,5 +1,4 @@
 require 'delegate'
-require 'icalendar/downcased_hash'
 
 module Icalendar
 
@@ -8,12 +7,12 @@ module Icalendar
     attr_accessor :ical_params
 
     def initialize(value, params = {})
-      @ical_params = Icalendar::DowncasedHash(params)
+      @ical_params = params.dup
       super value
     end
 
     def ical_param(key, value)
-      @ical_params[key] = value
+      @ical_params[key.to_s] = value
     end
 
     def value
@@ -21,7 +20,7 @@ module Icalendar
     end
 
     def to_ical(default_type)
-      ical_param 'value', self.value_type if needs_value_type?(default_type)
+      ical_param 'value', self.class.value_type if needs_value_type?(default_type)
       "#{params_ical}:#{value_ical}"
     end
 
@@ -33,10 +32,6 @@ module Icalendar
 
     def self.value_type
       name.gsub(/\A.*::/, '').gsub(/(?<!\A)[A-Z]/, '-\0').upcase
-    end
-
-    def value_type
-      self.class.value_type
     end
 
     private
@@ -63,9 +58,8 @@ module Icalendar
 
 end
 
-# helpers; not actual iCalendar value type
+# helper; not actual iCalendar value type
 require_relative 'values/array'
-require_relative 'values/date_or_date_time'
 
 # iCalendar value types
 require_relative 'values/binary'

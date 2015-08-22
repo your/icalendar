@@ -82,35 +82,11 @@ describe Icalendar::Event do
         expect(subject.comment).to eq ['a comment']
       end
     end
-
-    if defined? ActiveSupport
-      describe '#rdate' do
-        it 'does not convert a DateTime delegating for an ActiveSupport::TimeWithZone into an Array' do
-          timestamp = '20140130T230000Z'
-          expected = [Icalendar::Values::DateTime.new(timestamp)]
-
-          subject.rdate = timestamp
-          expect(subject.rdate).to eq(expected)
-        end
-      end
-    end
   end
 
   describe '#find_alarm' do
     it 'should not respond_to find_alarm' do
       expect(subject.respond_to?(:find_alarm)).to be false
-    end
-  end
-
-  describe '#has_alarm?' do
-    context 'without a set valarm' do
-      it { is_expected.not_to have_alarm }
-    end
-
-    context 'with a set valarm' do
-      before { subject.alarm }
-
-      it { is_expected.to have_alarm }
     end
   end
 
@@ -128,23 +104,5 @@ describe Icalendar::Event do
     it { expect(subject.to_ical).to include 'SUMMARY:My event\, my ical\, my test' }
     it { expect(subject.to_ical).to include 'X-CUSTOM-PROPERTY:customize' }
     it { expect(subject.to_ical).to include 'GEO:41.230896;-74.411774' }
-
-    context 'simple organizer' do
-      before :each do
-        subject.organizer = 'mailto:jsmith@example.com'
-      end
-
-      it { expect(subject.to_ical).to include 'ORGANIZER:mailto:jsmith@example.com' }
-    end
-
-    context 'complex organizer' do
-      before :each do
-        subject.organizer = Icalendar::Values::CalAddress.new("mailto:jsmith@example.com", cn: 'John Smith')
-      end
-
-      it { expect(subject.to_ical).to include 'ORGANIZER;CN=John Smith:mailto:jsmith@example.com' }
-    end
-
   end
-
 end

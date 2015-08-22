@@ -84,16 +84,6 @@ EXAMPLES
     end
     event.summary.ical_params #=> {'altrep' => 'http://my.language.net', 'language' => 'SPANISH'}
 
-#### Support for Dates or DateTimes
-
-Sometimes we don't care if an event's start or end are `Date` or `DateTime` objects. For this, we can use `DateOrDateTime.new(value).call`
-
-    event = cal.event do |e|
-      e.dtstart = Icalendar::Values::DateOrDateTime.new('20140924').call
-      e.dtend   = Icalendar::Values::DateOrDateTime.new('20140924').call
-      e.summary = 'This is an all-day event, because DateOrDateTime will return Dates'
-    end
-
 #### We can output the calendar as a string ####
 
     cal_string = cal.to_ical
@@ -153,18 +143,6 @@ ALARMS
     # TRIGGER:-PT15M
     # END:VALARM
 
-#### Checking for an Alarm ####
-
-Calling the `event.alarm` method will create an alarm if one doesn't exist. To check if an event has an alarm use the `has_alarm?` method.
-
-    event.has_alarm?
-    # => false
-
-    event.alarm
-    # => #<Icalendar::Alarm ... >
-
-    event.has_alarm?
-    #=> true
 
 TIMEZONES
 ---
@@ -234,8 +212,6 @@ iCalendar has been tested and works with `tzinfo` versions 0.3 and 1.1
       e.dtend   = Icalendar::Values::DateTime.new event_end, 'tzid' => tzid
       e.summary = "Meeting with the man."
       e.description = "Have a long lunch meeting and decide nothing..."
-      e.organizer = "mailto:jsmith@example.com"
-      e.organizer = Icalendar::Values::CalAddress.new("mailto:jsmith@example.com", cn: 'John Smith')
     end
 
 
@@ -321,20 +297,3 @@ Support & Contributions
 
 Please submit pull requests from a rebased topic branch and
 include tests for all bugs and features.
-
-Contributor Code of Conduct
----
-
-As contributors and maintainers of this project, we pledge to respect all people who contribute through reporting issues, posting feature requests, updating documentation, submitting pull requests or patches, and other activities.
-
-We are committed to making participation in this project a harassment-free experience for everyone, regardless of level of experience, gender, gender identity and expression, sexual orientation, disability, personal appearance, body size, race, ethnicity, age, or religion.
-
-Examples of unacceptable behavior by participants include the use of sexual language or imagery, derogatory comments or personal attacks, trolling, public or private harassment, insults, or other unprofessional conduct.
-
-Project maintainers have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct. Project maintainers who do not follow the Code of Conduct may be removed from the project team.
-
-This code of conduct applies both within project spaces and in public spaces when an individual is representing the project or its community.
-
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by opening an issue or contacting one or more of the project maintainers.
-
-This Code of Conduct is adapted from the [Contributor Covenant](http://contributor-covenant.org), version 1.1.0, available at [http://contributor-covenant.org/version/1/1/0/](http://contributor-covenant.org/version/1/1/0/)

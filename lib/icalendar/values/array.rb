@@ -3,22 +3,10 @@ module Icalendar
 
     class Array < Value
 
-      attr_reader :value_delimiter
-
       def initialize(value, klass, params = {}, options = {})
         @value_delimiter = options[:delimiter] || ','
         mapped = if value.is_a? ::Array
-                   value.map do |v|
-                     if v.is_a? Icalendar::Values::Array
-                       Icalendar::Values::Array.new v.value, klass, v.ical_params, delimiter: v.value_delimiter
-                     elsif v.is_a? ::Array
-                       Icalendar::Values::Array.new v, klass, params, delimiter: value_delimiter
-                     elsif v.is_a? Icalendar::Value
-                       v
-                     else
-                       klass.new v, params
-                     end
-                   end
+                   value.map { |v| klass.new v, params }
                  else
                    [klass.new(value, params)]
                  end
@@ -35,16 +23,12 @@ module Icalendar
       def value_ical
         value.map do |v|
           v.value_ical
-        end.join value_delimiter
+        end.join @value_delimiter
       end
 
       def valid?
         klass = value.first.class
         !value.all? { |v| v.class == klass }
-      end
-
-      def value_type
-        value.first.value_type
       end
 
       private

@@ -56,15 +56,6 @@ describe Icalendar::Values::DateTime do
       expect(subject.to_ical described_class).to eq ":#{value}"
     end
 
-    context 'manually set UTC' do
-      let(:value) { '20140209T194355' }
-      let(:params) { {'TZID' => 'UTC'} }
-
-      it 'does not add a tzid parameter, but does add a Z' do
-        expect(subject.to_ical described_class).to eq ":#{value}Z"
-      end
-    end
-
     context 'local time' do
       let(:value) { '20140209T160652' }
       let(:params) { {'tzid' => 'America/Denver'} }
@@ -83,14 +74,6 @@ describe Icalendar::Values::DateTime do
 
       it 'does not append a Z on output' do
         expect(subject.to_ical described_class).to eq ":#{value}"
-      end
-    end
-
-    context 'unparseable time' do
-      let(:value) { 'unparseable_time' }
-
-      it 'raises an error including the unparseable time' do
-        expect { subject }.to raise_error(ArgumentError, %r{Failed to parse \"#{value}\"})
       end
     end
   end

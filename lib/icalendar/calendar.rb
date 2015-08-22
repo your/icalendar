@@ -3,6 +3,7 @@ module Icalendar
   class Calendar < Component
     required_property :version
     required_property :prodid
+    optional_single_property :x_wr_calname
     optional_single_property :calscale
     optional_single_property :ip_method
 
@@ -14,6 +15,7 @@ module Icalendar
 
     def initialize
       super 'calendar'
+      self.x_wr_calname = 'calname'
       self.prodid = 'icalendar-ruby'
       self.version = '2.0'
       self.calscale = 'GREGORIAN'
